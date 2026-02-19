@@ -228,5 +228,3 @@ This project is part of the GoComet SDE-2 Assignment.
 Ashish Bhoya
 
 ---
-
-**Note**: This frontend is designed to work with a compatible backend API. Ensure the backend endpoints are implemented and accessible for full functionality. The application includes fallback data for development and testing purposes.
