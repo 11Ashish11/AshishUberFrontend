@@ -1,283 +1,185 @@
 # GoComet Ride-Hailing Frontend
 
-A modern React-based frontend application for a ride-hailing platform, featuring real-time WebSocket updates, dual-mode interface (Rider/Driver), and seamless integration with backend APIs.
+A React-based frontend for demonstrating the GoComet ride-hailing API. The app provides a step-by-step wizard that walks through the complete ride flow — from driver onboarding to payment — with live curl commands and API responses.
 
-## 🚀 Features
+## Features
 
-### Rider Features
-- **Request Rides**: Select pickup and destination locations, choose vehicle tier, and payment method
-- **Real-time Updates**: Live ride status updates via WebSocket
-- **Ride Management**: Cancel rides before trip starts, track ride progress in real-time
-- **Smart Cancel Button**: Automatically appears when ride is in REQUESTED, MATCHING, or MATCHED status
-- **Payment Processing**: Complete payment after ride completion
-- **Event Logging**: Real-time event log for debugging and monitoring
+- **Step-by-step API demo wizard** — 6 sequential steps covering the full ride lifecycle
+- **Curl command display** — shows the exact curl command for each API call
+- **Auto-advance** — automatically moves to the next step after a successful response
+- **Smart driver matching** — automatically detects which driver was matched by checking pending offers across all drivers
+- **Fallback data** — gracefully falls back to demo riders/drivers if the backend is unavailable
+- **Continuous location updates** — simulates GPS by sending driver location every 1 second
+- **Dark-themed UI** — modern dark interface with gradient accents
 
-### Driver Features
-- **Online/Offline Toggle**: Control driver availability status
-- **Location Updates**: Simulate location updates for driver tracking
-- **Ride Offers**: Receive and respond to incoming ride requests
-- **Trip Management**: Accept rides, start trips, and end trips with fare calculation
-- **Real-time Notifications**: WebSocket-based notifications for ride assignments
+## Ride Flow (6 Steps)
 
-### Technical Features
-- **Real-time Communication**: WebSocket integration using STOMP protocol
-- **Dynamic Data Loading**: Fetches riders, drivers, and configuration from backend APIs
-- **Graceful Fallbacks**: Automatic fallback to demo data if backend endpoints are unavailable
-- **Responsive Design**: Modern dark-themed UI optimized for mobile and desktop
-- **Error Handling**: Comprehensive error handling with user-friendly messages
+| Step | Action | API Endpoint |
+|------|--------|-------------|
+| 1 | Select driver & go online | `POST /v1/drivers/{driverId}/online` |
+| 2 | Send driver location (continuous, every 1s) | `POST /v1/drivers/{driverId}/location` |
+| 3 | Request ride from rider (Koramangala → Indiranagar) | `POST /v1/rides` |
+| 4 | Driver accepts ride (auto-detects matched driver) | `POST /v1/drivers/{driverId}/accept?rideId={rideId}` |
+| 5 | End trip | `POST /v1/trips/{tripId}/end` |
+| 6 | Process payment | `POST /v1/payments` |
 
-## 🛠️ Tech Stack
+## Tech Stack
 
-- **React** 18.2.0 - UI framework
-- **React DOM** 18.2.0 - React rendering
-- **React Scripts** 5.0.1 - Build tooling
-- **@stomp/stompjs** 7.0.0 - STOMP WebSocket client
-- **sockjs-client** 1.6.1 - WebSocket fallback transport
+- **React** 18.2.0
+- **React Scripts** 5.0.1
+- **@stomp/stompjs** 7.0.0
+- **sockjs-client** 1.6.1
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 files/
 ├── public/
-│   └── index.html          # HTML template
+│   └── index.html            # HTML template (loads DM Sans & JetBrains Mono fonts)
 ├── src/
-│   ├── index.js            # Application entry point
-│   ├── App.jsx             # Main application component
-│   ├── config.js           # Configuration and constants
-│   ├── api.js              # API client functions
-│   ├── useWebSocket.js     # WebSocket hook
-│   ├── RiderView.jsx       # Rider interface component
-│   ├── DriverView.jsx      # Driver interface component
-│   ├── StatusBadge.jsx     # Status badge component
-│   └── EventLog.jsx        # Event log component
-├── package.json            # Dependencies and scripts
-└── README.md              # This file
+│   ├── index.js              # Entry point, global styles, renders App
+│   ├── App.jsx               # Step-by-step wizard (main UI)
+│   ├── config.js             # API base URL and location presets
+│   ├── api.js                # All REST API client functions
+│   ├── useWebSocket.js       # WebSocket hook (unused by wizard, available for future use)
+│   ├── RiderView.jsx         # Rider interface (unused by wizard, available for future use)
+│   ├── DriverView.jsx        # Driver interface (unused by wizard, available for future use)
+│   ├── StatusBadge.jsx       # Status badge component (unused by wizard, available for future use)
+│   └── EventLog.jsx          # Event log component (unused by wizard, available for future use)
+├── package.json
+└── README.md
 ```
 
-## 🚦 Getting Started
+> **Note:** `RiderView`, `DriverView`, `useWebSocket`, `StatusBadge`, and `EventLog` are from a previous dual-mode Rider/Driver architecture. They are not currently used by `App.jsx` but remain in the codebase for potential future use.
+
+## Getting Started
 
 ### Prerequisites
 
-- **Node.js** (v14 or higher recommended)
-- **npm** or **yarn**
+- **Node.js** (v14 or higher)
+- **npm**
+- Backend API running (defaults to `http://localhost:8080`)
 
 ### Installation
 
-1. **Clone the repository** (if applicable) or navigate to the project directory:
-   ```bash
-   cd files
-   ```
+```bash
+cd files
+npm install
+```
 
-2. **Install dependencies**:
-   ```bash
-   npm install
-   ```
+### Configuration
 
-3. **Configure API endpoints** (if needed):
-   Edit `src/config.js` to update API base URL and WebSocket URL:
-   ```javascript
-   const CONFIG = {
-     API_BASE: 'https://your-api-url.com',
-     WS_URL: 'https://your-api-url.com/ws',
-     // ...
-   };
-   ```
+Edit `src/config.js` to point to your backend:
 
-### Running the Application
+```javascript
+const CONFIG = {
+  API_BASE: 'http://localhost:8080',
+  WS_URL: 'http://localhost:8080/ws',
+  // For deployed backend, uncomment:
+  // API_BASE: 'https://ashishridehailing-api.onrender.com',
+  // WS_URL: 'https://ashishridehailing-api.onrender.com/ws',
+};
+```
 
-**Development mode**:
+### Running
+
 ```bash
 npm start
 ```
 
-The application will start on `http://localhost:3000` (or the next available port).
+Opens on `http://localhost:3000` (or the next available port).
 
-**Production build**:
+### Production Build
+
 ```bash
 npm run build
 ```
 
-This creates an optimized production build in the `build/` directory.
+## API Endpoints
 
-## 🔌 API Endpoints
+The frontend uses the following backend endpoints:
 
-The frontend expects the following backend API endpoints:
+### User & Config
 
-### User Endpoints
-- `GET /v1/riders` - Fetch list of riders
-- `GET /v1/drivers` - Fetch list of drivers
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/v1/riders` | Fetch list of riders |
+| `GET` | `/v1/drivers` | Fetch list of drivers |
 
-### Configuration Endpoints
-- `GET /v1/config/vehicle-tiers` - Fetch available vehicle tiers
-- `GET /v1/config/payment-methods` - Fetch available payment methods
+### Driver
 
-### Ride Endpoints
-- `POST /v1/rides` - Create a new ride request
-- `GET /v1/rides/:rideId` - Get ride details
-- `POST /v1/rides/:rideId/cancel` - Cancel a ride (only works for REQUESTED, MATCHING, MATCHED statuses)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/v1/drivers/{driverId}/online` | Set driver online |
+| `POST` | `/v1/drivers/{driverId}/offline` | Set driver offline |
+| `POST` | `/v1/drivers/{driverId}/location` | Update driver location (`{ latitude, longitude }`) |
+| `POST` | `/v1/drivers/{driverId}/accept?rideId={rideId}` | Accept a ride |
+| `POST` | `/v1/drivers/{driverId}/decline?rideId={rideId}` | Decline a ride |
+| `GET` | `/v1/drivers/{driverId}/pending-offers` | Get pending ride offers for a driver |
 
-### Driver Endpoints
-- `POST /v1/drivers/:driverId/online` - Set driver online
-- `POST /v1/drivers/:driverId/offline` - Set driver offline
-- `POST /v1/drivers/:driverId/location` - Update driver location
-- `POST /v1/drivers/:driverId/accept?rideId=:rideId` - Accept a ride
-- `POST /v1/drivers/:driverId/decline?rideId=:rideId` - Decline a ride
+### Ride
 
-### Trip Endpoints
-- `GET /v1/trips/:tripId` - Get trip details
-- `POST /v1/trips/:tripId/end` - End a trip
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/v1/rides` | Create a ride request (see payload below) |
+| `GET` | `/v1/rides/{rideId}` | Get ride details |
+| `POST` | `/v1/rides/{rideId}/cancel` | Cancel a ride |
 
-### Payment Endpoints
-- `POST /v1/payments` - Process payment
-
-### WebSocket
-- `WS /ws` - WebSocket endpoint for real-time updates
-  - Subscribe to `/topic/rider/:riderId` for rider updates
-  - Subscribe to `/topic/driver/:driverId` for driver updates
-
-## 🔧 Configuration
-
-### Environment Variables
-
-Currently, configuration is managed in `src/config.js`. For production, consider using environment variables:
-
-```javascript
-const CONFIG = {
-  API_BASE: process.env.REACT_APP_API_BASE || 'https://ashishridehailing-api.onrender.com',
-  WS_URL: process.env.REACT_APP_WS_URL || 'https://ashishridehailing-api.onrender.com/ws',
-  // ...
-};
+**Create ride payload:**
+```json
+{
+  "riderId": "uuid",
+  "pickupLat": 12.9352,
+  "pickupLng": 77.6245,
+  "destinationLat": 12.9716,
+  "destinationLng": 77.6412,
+  "vehicleTier": "SEDAN",
+  "paymentMethod": "UPI",
+  "idempotencyKey": "ride-<timestamp>"
+}
 ```
 
-### Fallback Data
+### Trip
 
-The application includes fallback data for development and testing when backend endpoints are unavailable:
-- **Riders**: Demo rider accounts
-- **Drivers**: Demo driver accounts with vehicle types
-- **Vehicle Tiers**: SEDAN, AUTO, SUV
-- **Payment Methods**: UPI, CASH, CARD
-- **Location Presets**: Bangalore locations (Koramangala, Indiranagar, etc.)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/v1/trips/{tripId}` | Get trip details |
+| `POST` | `/v1/trips/{tripId}/end` | End a trip (`{ endLat, endLng }`) |
 
-## 🎨 UI Components
+### Payment
 
-### StatusBadge
-Displays status badges with color-coded styling for different states:
-- Ride statuses: REQUESTED, MATCHING, MATCHED, IN_PROGRESS, COMPLETED, CANCELLED
-- Payment statuses: PENDING, SUCCESS, FAILED
-- Driver statuses: ONLINE, OFFLINE, ON_TRIP
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/v1/payments` | Process payment (`{ tripId, paymentMethod, idempotencyKey }`) |
 
-### EventLog
-Real-time event logging component that displays:
-- WebSocket messages
-- API responses
-- User actions
-- Error messages
+## Fallback Data
 
-## 🚫 Ride Cancellation
+When the backend is unavailable, the app falls back to hardcoded demo data:
 
-### How It Works
+- **Riders:** Ashish, Priya
+- **Drivers:** Raju (SEDAN), Kumar (AUTO), Suresh (SUV), Venkat (SEDAN), Anil (AUTO)
+- **Location presets:** Koramangala, Indiranagar, MG Road, Whitefield, HSR Layout, Jayanagar (all Bangalore)
 
-The cancel feature allows riders to cancel their ride requests before the trip officially starts.
+## How the Wizard Works
 
-**Cancel Button Visibility:**
-- Automatically appears when ride is in cancellable status
-- Only visible for: `REQUESTED`, `MATCHING`, or `MATCHED` statuses
-- Hidden once driver accepts (`ACCEPTED`) or trip starts (`IN_PROGRESS`)
+1. On mount, the app fetches riders and drivers from the backend (falls back to demo data on failure).
+2. Each step shows the API endpoint, a ready-to-copy curl command, and an "Execute API Call" button.
+3. After a successful API call, the response JSON is displayed and the wizard auto-advances to the next step after 2 seconds.
+4. **Step 4 (Accept Ride)** iterates through all drivers to find which one received the pending offer, since the matching system assigns the nearest driver — not necessarily the one selected in Step 1.
+5. After Step 6, a completion screen appears with a "Start Over" button.
+6. The "Clean Slate" button resets the wizard and stops background location updates.
 
-**Cancellation Flow:**
-1. Rider clicks "Cancel Ride" button (red danger button)
-2. Frontend calls `POST /v1/rides/{rideId}/cancel`
-3. Backend validates the ride status and cancels if allowed
-4. Ride status updates to `CANCELLED`
-5. UI automatically updates via WebSocket or polling
-6. "New Ride" button appears to start fresh
+## Error Handling
 
-**Handling "Active Ride" Errors:**
+- **30-second request timeout** with a helpful message about cold-starting servers
+- **Fallback to demo data** when backend user/config endpoints are unavailable
+- **Error display** with the raw status code and response body
+- **409 Conflict handling** — if a rider already has an active ride, the error is shown so the user can clean up via the backend
 
-If you encounter a `409 Conflict` error: "Rider already has an active ride", this means there's a stale ride from a previous session that wasn't cancelled.
-
-**Solutions:**
-
-1. **Quick Fix** - Clear the error and the old ride should be displayed with a cancel button
-2. **Manual Cleanup** - Use backend API or database to cancel the stale ride (see backend README)
-3. **UI Workaround** - Switch to a different rider temporarily, or refresh the page
-
-**Error Messages:**
-- `409 Conflict` - Rider has an active ride (shows stale ride that needs cancellation)
-- `400 Bad Request` - Cannot cancel ride in current status (trip already started/completed)
-- `404 Not Found` - Ride ID doesn't exist
-
-**Code Implementation:**
-```javascript
-// RiderView.jsx lines 165-177
-const handleCancel = async () => {
-  if (!currentRide) return;
-  setLoading(true);
-  try {
-    await cancelRide(currentRide.id);  // API call
-    setCurrentRide((prev) => ({ ...prev, status: 'CANCELLED' }));
-    addEvent('Ride cancelled');
-  } catch (err) {
-    setError(err.message);
-  } finally {
-    setLoading(false);
-  }
-};
-```
-
-## 🔄 State Management
-
-The application uses React hooks for state management:
-- `useState` for component-level state
-- `useEffect` for side effects and data fetching
-- `useCallback` for memoized callbacks
-- `useRef` for mutable references (polling intervals, WebSocket clients)
-
-## 🐛 Error Handling
-
-- **API Errors**: Graceful fallback to demo data
-- **WebSocket Errors**: Connection status indicators and error messages
-- **Network Errors**: User-friendly error messages with retry options
-- **Timeout Handling**: 30-second timeout for API requests with helpful messages
-
-## 📝 Development Notes
-
-### WebSocket Connection
-- Automatic reconnection with 5-second delay
-- Heartbeat mechanism (10-second intervals)
-- Subscription queue for pending subscriptions
-- Connection status indicator in UI
-
-### Polling Strategy
-- Fallback polling every 3 seconds for active rides
-- Automatic cleanup on component unmount
-- Prevents memory leaks with proper interval management
-
-### Code Quality
-- Clean component structure
-- Separation of concerns (API, WebSocket, UI)
-- Consistent styling with inline styles
-- Error boundaries ready for implementation
-
-## 🚧 Future Improvements
-
-- [ ] Add TypeScript for type safety
-- [ ] Implement error boundaries
-- [ ] Add unit and integration tests
-- [ ] Extract shared styles to a theme file
-- [ ] Add PropTypes or TypeScript types
-- [ ] Implement proper authentication
-- [ ] Add geocoding API integration for location search
-- [ ] Improve accessibility (ARIA labels, keyboard navigation)
-- [ ] Add loading skeletons
-- [ ] Implement state management library (Redux/Zustand) if needed
-
-## 📄 License
+## License
 
 This project is part of the GoComet SDE-2 Assignment.
 
-## 👤 Author
+## Author
 
 Ashish Bhoya
-
----
