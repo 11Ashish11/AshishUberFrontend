@@ -1,6 +1,8 @@
 const CONFIG = {
-  API_BASE: 'https://ashishridehailing-api.onrender.com',
-  WS_URL: 'https://ashishridehailing-api.onrender.com/ws',
+  API_BASE: 'http://localhost:8080',
+  WS_URL: 'http://localhost:8080/ws',
+  // API_BASE: 'https://ashishridehailing-api.onrender.com',
+  // WS_URL: 'https://ashishridehailing-api.onrender.com/ws',
 
   // Fallback location presets (for demo/testing - in production, use geocoding API)
   LOCATION_PRESETS: {

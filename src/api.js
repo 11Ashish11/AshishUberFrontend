@@ -84,6 +84,10 @@ export function declineRide(driverId, rideId) {
   return request(`${BASE}/v1/drivers/${driverId}/decline?rideId=${rideId}`, { method: 'POST' });
 }
 
+export function getPendingOffers(driverId) {
+  return request(`${BASE}/v1/drivers/${driverId}/pending-offers`);
+}
+
 // ── Trip APIs ──────────────────────────────────────────────
 
 export function getTrip(tripId) {

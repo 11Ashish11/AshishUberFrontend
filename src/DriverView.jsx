@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import CONFIG from './config';
-import { goOnline, goOffline, sendLocation, acceptRide, declineRide, endTrip } from './api';
+import { goOnline, goOffline, sendLocation, acceptRide, declineRide, endTrip, getPendingOffers } from './api';
 import StatusBadge from './StatusBadge';
 import EventLog from './EventLog';
 
@@ -44,6 +44,26 @@ export default function DriverView({ selectedDriver, ws }) {
 
     return unsub;
   }, [selectedDriver, ws.connected, ws, addEvent]);
+
+  // Fetch pending offers when driver is selected
+  useEffect(() => {
+    if (!selectedDriver) return;
+
+    async function fetchPendingOffers() {
+      try {
+        const offers = await getPendingOffers(selectedDriver.id);
+        if (offers && offers.length > 0) {
+          setIncomingRide(offers[0]);
+          addEvent(`Loaded pending offer: ${offers[0].rideId?.slice(0, 8)}...`);
+        }
+      } catch (err) {
+        // Silently fail - driver may not have pending offers
+        console.log('No pending offers or error fetching:', err.message);
+      }
+    }
+
+    fetchPendingOffers();
+  }, [selectedDriver, addEvent]);
 
   // Reset state when driver changes
   useEffect(() => {

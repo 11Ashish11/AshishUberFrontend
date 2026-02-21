@@ -7,7 +7,8 @@ A modern React-based frontend application for a ride-hailing platform, featuring
 ### Rider Features
 - **Request Rides**: Select pickup and destination locations, choose vehicle tier, and payment method
 - **Real-time Updates**: Live ride status updates via WebSocket
-- **Ride Management**: Cancel rides, track ride progress, and view ride history
+- **Ride Management**: Cancel rides before trip starts, track ride progress in real-time
+- **Smart Cancel Button**: Automatically appears when ride is in REQUESTED, MATCHING, or MATCHED status
 - **Payment Processing**: Complete payment after ride completion
 - **Event Logging**: Real-time event log for debugging and monitoring
 
@@ -113,7 +114,7 @@ The frontend expects the following backend API endpoints:
 ### Ride Endpoints
 - `POST /v1/rides` - Create a new ride request
 - `GET /v1/rides/:rideId` - Get ride details
-- `POST /v1/rides/:rideId/cancel` - Cancel a ride
+- `POST /v1/rides/:rideId/cancel` - Cancel a ride (only works for REQUESTED, MATCHING, MATCHED statuses)
 
 ### Driver Endpoints
 - `POST /v1/drivers/:driverId/online` - Set driver online
@@ -171,6 +172,58 @@ Real-time event logging component that displays:
 - API responses
 - User actions
 - Error messages
+
+## 🚫 Ride Cancellation
+
+### How It Works
+
+The cancel feature allows riders to cancel their ride requests before the trip officially starts.
+
+**Cancel Button Visibility:**
+- Automatically appears when ride is in cancellable status
+- Only visible for: `REQUESTED`, `MATCHING`, or `MATCHED` statuses
+- Hidden once driver accepts (`ACCEPTED`) or trip starts (`IN_PROGRESS`)
+
+**Cancellation Flow:**
+1. Rider clicks "Cancel Ride" button (red danger button)
+2. Frontend calls `POST /v1/rides/{rideId}/cancel`
+3. Backend validates the ride status and cancels if allowed
+4. Ride status updates to `CANCELLED`
+5. UI automatically updates via WebSocket or polling
+6. "New Ride" button appears to start fresh
+
+**Handling "Active Ride" Errors:**
+
+If you encounter a `409 Conflict` error: "Rider already has an active ride", this means there's a stale ride from a previous session that wasn't cancelled.
+
+**Solutions:**
+
+1. **Quick Fix** - Clear the error and the old ride should be displayed with a cancel button
+2. **Manual Cleanup** - Use backend API or database to cancel the stale ride (see backend README)
+3. **UI Workaround** - Switch to a different rider temporarily, or refresh the page
+
+**Error Messages:**
+- `409 Conflict` - Rider has an active ride (shows stale ride that needs cancellation)
+- `400 Bad Request` - Cannot cancel ride in current status (trip already started/completed)
+- `404 Not Found` - Ride ID doesn't exist
+
+**Code Implementation:**
+```javascript
+// RiderView.jsx lines 165-177
+const handleCancel = async () => {
+  if (!currentRide) return;
+  setLoading(true);
+  try {
+    await cancelRide(currentRide.id);  // API call
+    setCurrentRide((prev) => ({ ...prev, status: 'CANCELLED' }));
+    addEvent('Ride cancelled');
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
+```
 
 ## 🔄 State Management
 
