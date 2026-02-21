@@ -2,6 +2,11 @@
 
 A React-based frontend for demonstrating the GoComet ride-hailing API. The app provides a step-by-step wizard that walks through the complete ride flow — from driver onboarding to payment — with live curl commands and API responses.
 
+<img width="1020" height="665" alt="Screenshot 2026-02-21 at 6 32 40 PM" src="https://github.com/user-attachments/assets/c4aa54c8-27f9-4c8f-bc8b-df431b48ebb1" />
+
+
+
+
 ## Features
 
 - **Step-by-step API demo wizard** — 6 sequential steps covering the full ride lifecycle
